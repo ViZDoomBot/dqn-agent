@@ -85,7 +85,7 @@ def train():
                         action = agent.get_action(frame_number, game_wrapper.state)
 
                         # Take step
-                        processed_frame, reward, terminal = game_wrapper.step(action)
+                        processed_frame, reward, terminal = game_wrapper.step(action, smooth_rendering=False)
                         frame_number += 1
                         epoch_frame += 1
                         episode_reward_sum += reward
@@ -148,7 +148,7 @@ def train():
                         terminal = False
 
                     action = agent.get_action(frame_number, game_wrapper.state, evaluation=True)
-                    _, reward, terminal = game_wrapper.step(action)
+                    _, reward, terminal = game_wrapper.step(action, smooth_rendering=False)
                     evaluate_frame_number += 1
                     episode_reward_sum += reward
 

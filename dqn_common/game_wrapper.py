@@ -54,28 +54,37 @@ class GameWrapper:
         # For the initial state, we stack the first frame history_length times
         self.state = np.repeat(process_frame(self.frame, self.preprocess_shape), self.history_length, axis=-1)
 
-    def step(self, action):
+    def step(self, action, smooth_rendering=False):
         """Performs an action and observes the result
         Arguments:
             action: An integer describe action the agent chose
+            smooth_rendering: Whether render intermediate states to make game looks smoother;
+                skip rendering tics could potentially expedite training
         Returns:
             processed_frame: The processed new frame as a result of that action
             reward: The reward for taking that action
             terminal: Whether the game has ended
         """
-        self.env.set_action(self.action_list[action])
-        reward = self.env.get_last_reward()
-        new_frame = self.frame
-        terminal = self.env.is_episode_finished()
-        for _ in range(self.frames_to_skip):
-            self.env.advance_action()
+        if not smooth_rendering:
+            # make_action will not update(render) skipped tics
+            reward = self.env.make_action(self.action_list[action], self.frames_to_skip)
             terminal = self.env.is_episode_finished()
-            if terminal:
-                break
-            else:
-                reward = self.env.get_last_reward()
-                state = self.env.get_state()
-                new_frame = state.screen_buffer
+            state = self.env.get_state()
+            new_frame = state.screen_buffer if state is not None else self.frame
+        else:
+            self.env.set_action(self.action_list[action])
+            reward = 0.0
+            new_frame = self.frame
+            terminal = self.env.is_episode_finished()
+            for _ in range(self.frames_to_skip):
+                self.env.advance_action()
+                terminal = self.env.is_episode_finished()
+                if terminal:
+                    break
+                else:
+                    reward += self.env.get_last_reward()
+                    state = self.env.get_state()
+                    new_frame = state.screen_buffer
 
         processed_frame = process_frame(new_frame, self.preprocess_shape)
         self.state = np.append(self.state[:, :, 1:], processed_frame, axis=-1)
