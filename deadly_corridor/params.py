@@ -28,13 +28,13 @@ USE_PER = True
 PRIORITY_SCALE = 0.7
 
 TOTAL_FRAMES = 30_000_000  # Total number of frames to train for
-EPS_ANNEALING_FRAMES = 1_000_000
+EPS_ANNEALING_FRAMES = 2_000_000
 # MAX_EPISODE_LENGTH = 18000  # Maximum length of an episode (in frames)
 FRAMES_BETWEEN_EVAL = 10_000  # Number of frames between evaluations
 EVAL_LENGTH = 4000  # Number of frames to evaluate for
 
 DISCOUNT_FACTOR = 0.99  # Gamma, how much to discount future rewards
-MEM_SIZE = 10_000  # The maximum size of the replay buffer
+MEM_SIZE = 50_000  # The maximum size of the replay buffer
 MIN_REPLAY_BUFFER_SIZE = 500  # The minimum size the replay buffer must be before we start to update the agent
 
 UPDATE_FREQ = 4  # Number of actions between gradient descent steps

@@ -74,6 +74,7 @@ def evaluate(num_episodes=10):
         print("Reward:", episode_reward)
         rewards.append(episode_reward)
 
+    game_wrapper.stop()
     rewards = np.array(rewards, dtype=float)
     print("===============")
     print("Reward avg:", rewards.mean())

@@ -187,6 +187,8 @@ def train():
             )
             print('Saved.')
 
+        game_wrapper.stop()
+
 
 if __name__ == '__main__':
     train()

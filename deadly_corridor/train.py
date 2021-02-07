@@ -178,6 +178,7 @@ def train():
     except:
         print('\nTraining exited early.')
         writer.close()
+        game_wrapper.stop()
 
         if SAVE_PATH is not None:
             print('Saving...')

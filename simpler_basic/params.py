@@ -22,7 +22,7 @@ TENSORBOARD_DIR = 'tf_board/'
 # If True, use the prioritized experience replay algorithm, instead of regular experience replay
 # This is much more computationally expensive, but will also allow for better results. Implementing
 # a binary heap, as recommended in the PER paper, would make this less expensive.
-USE_PER = False
+USE_PER = True
 
 # How much the replay buffer should sample based on priorities.
 # 0 = complete random samples, 1 = completely aligned with priorities

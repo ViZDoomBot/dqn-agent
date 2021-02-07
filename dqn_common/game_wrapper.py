@@ -91,6 +91,13 @@ class GameWrapper:
 
         return processed_frame, reward, terminal
 
+    def stop(self):
+        """
+        Stop the VizDoom gracefully.
+        :return: None
+        """
+        self.env.close()
+
 
 def test_game_wrapper():
     g = GameWrapper(
