@@ -69,7 +69,8 @@ def evaluate(num_episodes=10):
             action = agent.get_action(0, game_wrapper.state, evaluation=True)
 
             # Take step
-            _, r, terminal = game_wrapper.step(action, smooth_rendering=True)
+            # XXX: we ignore shaping reward during evaluation
+            _, r, terminal, _ = game_wrapper.step(action, smooth_rendering=True)
             episode_reward += r
         print("Reward:", episode_reward)
         rewards.append(episode_reward)

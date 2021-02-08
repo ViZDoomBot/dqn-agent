@@ -23,6 +23,7 @@ from dqn_common.agent import DQNAgent
 from constants import *
 from params import *
 from model import build_q_network
+from reward_shaper import RewardShaper
 
 
 def train():
@@ -30,7 +31,8 @@ def train():
     game_wrapper = GameWrapper(
         SCENARIO_CFG_PATH, ACTION_LIST,
         INPUT_SHAPE, FRAMES_TO_SKIP, HISTORY_LENGTH,
-        visible=VISIBLE_TRAINING, is_sync=True
+        visible=VISIBLE_TRAINING, is_sync=True,
+        reward_shaper=RewardShaper() if USE_REWARD_SHAPING else None,
     )
 
     # TensorBoard writer
@@ -85,7 +87,10 @@ def train():
                         action = agent.get_action(frame_number, game_wrapper.state)
 
                         # Take step
-                        processed_frame, reward, terminal = game_wrapper.step(action, smooth_rendering=False)
+                        # XXX: we add shaping_reward to total reward only in training
+                        processed_frame, reward, terminal, shaping_reward = \
+                            game_wrapper.step(action, smooth_rendering=False)
+                        reward += shaping_reward
                         frame_number += 1
                         epoch_frame += 1
                         episode_reward_sum += reward
@@ -148,7 +153,8 @@ def train():
                         terminal = False
 
                     action = agent.get_action(frame_number, game_wrapper.state, evaluation=True)
-                    _, reward, terminal = game_wrapper.step(action, smooth_rendering=False)
+                    # XXX: we ignore shaping reward during evaluation
+                    _, reward, terminal, _ = game_wrapper.step(action, smooth_rendering=False)
                     evaluate_frame_number += 1
                     episode_reward_sum += reward
 

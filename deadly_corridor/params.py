@@ -28,7 +28,7 @@ USE_PER = True
 PRIORITY_SCALE = 0.7
 
 TOTAL_FRAMES = 30_000_000  # Total number of frames to train for
-EPS_ANNEALING_FRAMES = 2_000_000
+EPS_ANNEALING_FRAMES = 1_000_000
 # MAX_EPISODE_LENGTH = 18000  # Maximum length of an episode (in frames)
 FRAMES_BETWEEN_EVAL = 10_000  # Number of frames between evaluations
 EVAL_LENGTH = 4000  # Number of frames to evaluate for
@@ -49,3 +49,4 @@ FRAMES_TO_SKIP = 4
 LEARNING_RATE = 0.0001
 
 VISIBLE_TRAINING = True
+USE_REWARD_SHAPING = True

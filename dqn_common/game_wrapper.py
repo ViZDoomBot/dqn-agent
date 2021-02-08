@@ -10,6 +10,7 @@ import vizdoom as vzd
 import numpy as np
 
 from dqn_common.utils import process_frame
+from dqn_common.i_reward_shaper import IRewardShaper
 from typing import List
 
 
@@ -23,6 +24,7 @@ class GameWrapper:
             history_length=4,
             visible=False,
             is_sync=True,
+            reward_shaper: 'IRewardShaper' = None
     ):
         game = vzd.DoomGame()
         game.load_config(scenario_cfg_path)
@@ -33,12 +35,15 @@ class GameWrapper:
             game.set_mode(vzd.Mode.ASYNC_PLAYER)
         game.set_screen_format(vzd.ScreenFormat.GRAY8)
         game.set_screen_resolution(vzd.ScreenResolution.RES_640X480)
+        if reward_shaper is not None:
+            game.set_available_game_variables(reward_shaper.get_subscribed_game_var_list())
         game.init()
         self.env = game
         self.action_list = action_list
         self.preprocess_shape = preprocess_shape
         self.frames_to_skip = frames_to_skip
         self.history_length = history_length
+        self.reward_shaper = reward_shaper
 
         self.state = None
         self.frame = None
@@ -50,6 +55,8 @@ class GameWrapper:
         self.env.new_episode()
         init_state = self.env.get_state()
         self.frame = init_state.screen_buffer
+        if self.reward_shaper is not None:
+            self.reward_shaper.reset(init_state.game_variables)
 
         # For the initial state, we stack the first frame history_length times
         self.state = np.repeat(process_frame(self.frame, self.preprocess_shape), self.history_length, axis=-1)
@@ -64,6 +71,8 @@ class GameWrapper:
             processed_frame: The processed new frame as a result of that action
             reward: The reward for taking that action
             terminal: Whether the game has ended
+            shaping_reward: Optional shaping reward for training. Applicable only if
+                self.reward_shaper is not None
         """
         if not smooth_rendering:
             # make_action will not update(render) skipped tics
@@ -71,11 +80,14 @@ class GameWrapper:
             terminal = self.env.is_episode_finished()
             state = self.env.get_state()
             new_frame = state.screen_buffer if state is not None else self.frame
+            shaping_reward = self.reward_shaper.calc_reward(state.game_variables) \
+                if self.reward_shaper is not None and state is not None else 0.0
         else:
             self.env.set_action(self.action_list[action])
             reward = 0.0
             new_frame = self.frame
             terminal = self.env.is_episode_finished()
+            new_vars = self.env.get_state().game_variables
             for _ in range(self.frames_to_skip):
                 self.env.advance_action()
                 terminal = self.env.is_episode_finished()
@@ -85,11 +97,14 @@ class GameWrapper:
                     reward += self.env.get_last_reward()
                     state = self.env.get_state()
                     new_frame = state.screen_buffer
+                    new_vars = state.game_variables
+            shaping_reward = self.reward_shaper.calc_reward(new_vars) \
+                if self.reward_shaper is not None else 0.0
 
         processed_frame = process_frame(new_frame, self.preprocess_shape)
         self.state = np.append(self.state[:, :, 1:], processed_frame, axis=-1)
 
-        return processed_frame, reward, terminal
+        return processed_frame, reward, terminal, shaping_reward
 
     def stop(self):
         """
