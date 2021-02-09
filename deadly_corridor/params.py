@@ -34,7 +34,7 @@ FRAMES_BETWEEN_EVAL = 10_000  # Number of frames between evaluations
 EVAL_LENGTH = 4000  # Number of frames to evaluate for
 
 DISCOUNT_FACTOR = 0.99  # Gamma, how much to discount future rewards
-MEM_SIZE = 50_000  # The maximum size of the replay buffer
+MEM_SIZE = 10_000  # The maximum size of the replay buffer
 MIN_REPLAY_BUFFER_SIZE = 500  # The minimum size the replay buffer must be before we start to update the agent
 
 UPDATE_FREQ = 4  # Number of actions between gradient descent steps
@@ -46,7 +46,7 @@ BATCH_SIZE = 64  # Number of samples the agent learns from at once
 HISTORY_LENGTH = 4
 
 FRAMES_TO_SKIP = 4
-LEARNING_RATE = 0.0001
+LEARNING_RATE = 0.00025
 
 VISIBLE_TRAINING = True
 USE_REWARD_SHAPING = True
